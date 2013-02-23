@@ -54,6 +54,7 @@ function process_uploaded_file($id) {
           return $filename;
           //    }
           //    
+          //
       }
     }
   else
@@ -64,7 +65,14 @@ function process_uploaded_file($id) {
   return null;
 }
 
-$row = array('id' => 5, 'address' => '200 Main Street');
+$row = array('id' => null, 'address' => 'null');
+
+if ($_GET['id']) {
+  $stmt = $db->prepare("SELECT * FROM properties WHERE id = ?");
+  $stmt->execute(array($_GET['id']));
+  $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  $row = $rows[0];
+}
 
 if ($_POST['submit']) {
 
@@ -87,17 +95,22 @@ if ($_POST['submit']) {
     $row[$attr] = $_POST[$attr];
   }
 
-  # if valid, save
-  $stmt = $db->prepare("INSERT INTO properties (address) VALUES (?)");
-  $stmt->execute(array($row['address']));
-  $id = $db->lastInsertId();
+  if ($_GET['id']) {
+    $stmt = $db->prepare("UPDATE properties SET address = ? WHERE id = ?");
+    $stmt->execute(array($row['address'], $row['id']));
+  } else {
+    # if valid, save
+    $stmt = $db->prepare("INSERT INTO properties (address) VALUES (?)");
+    $stmt->execute(array($row['address']));
+    $id = $db->lastInsertId();
+    header("location: details.php?id=$id"); die();
+  }
 
-  header("location: details.php?id=$id"); die();
 }
 
 ?>
 
-<form action="details.php" method="post" enctype="multipart/form-data">
+<form action="" method="post" enctype="multipart/form-data">
   <div>
     <label for="address">Address</label>
     <input id="address" name="address" type="text" value="<?= $row['address'] ?>" />
