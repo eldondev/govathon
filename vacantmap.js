@@ -28,14 +28,8 @@ xhr.onload = function() {
 								new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
 								map.getProjectionObject() // to Spherical Mercator Projection
 							);
-							
-		var infobox = new khtml.maplib.overlay.InfoWindow({content: "This is a marker-infobox!"});
-		var marker = new OpenLayers.Marker(lonLat);
-		marker.attachEvent( 'click', function() {
-		        infobox.open(map, this);
-		});
-							
-		markers.addMarker(marker);
+
+		markers.addMarker(new OpenLayers.Marker(lonLat));
 	});
 };
 xhr.send();
