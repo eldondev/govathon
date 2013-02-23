@@ -1,6 +1,6 @@
 <html><body>
 	<div id="mapdiv"></div>
-	<script src="vacantmap.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 	<script src="http://www.openlayers.org/api/OpenLayers.js"></script>
 	<script>
 		map = new OpenLayers.Map("mapdiv");
@@ -22,4 +22,5 @@
 		console.log(lonLat);
 		map.setCenter (lonLat, zoom);
 	</script>
+	<script src="vacantmap.js"></script>
 </body></html>

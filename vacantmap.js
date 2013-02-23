@@ -2,8 +2,9 @@ var xhr = new XMLHttpRequest();
 xhr.open('GET', 'vacant.json');
 xhr.onload = function() {
 	// map the data
-	// var response = $.parseJSON(xhr.responseText);
-	console.log(xhr.responseText); // Works now!
+	var response = $.parseJSON(xhr.responseText);
+	vacantProp = response.per.mapRS[0];
+	console.log(vacantProp); // Works now!
 };
 
 // if (tests.progress) {
