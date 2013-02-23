@@ -1,9 +1,25 @@
+<form method="post" action="service.php">
+<input type="text" name="input" />
+<select name="function">
+    <option>listSMS</option>
+    <option>getGoogle</option>
+    <option>getLatLong</option>
+</select>
+<input type="Submit" value="Submit" />
+</form>
+
+
 <?php
 error_reporting(E_ALL);
 require ('Services/Twilio.php');
 include ('Auth.php');
 
-getLatLong("SM2874a5ed98ce6f347e34a1c8aad0bde9");
+if ($_POST)
+{
+    $function = $_POST['function'];
+    $input = $_POST['input'];
+    $function($input);
+}
 
 function listSMS()
 {
