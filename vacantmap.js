@@ -33,3 +33,18 @@ xhr.onload = function() {
 	});
 };
 xhr.send();
+
+// REAL TIME DATA MAP UPDATE
+var socket = io.connect('http://ec2-23-23-39-12.compute-1.amazonaws.com:8080/');
+socket.on('news', function (data) {
+  console.log(data);
+  socket.emit('my other event', { my: 'data' });
+
+	var lonLat = new OpenLayers.LonLat( data[0].lon, data[0].lat )
+						.transform(
+							new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+							map.getProjectionObject() // to Spherical Mercator Projection
+						);
+
+	markers.addMarker(new OpenLayers.Marker(lonLat));
+});
