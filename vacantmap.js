@@ -34,7 +34,7 @@ xhr.onload = function() {
 		marker.attachEvent( 'click', function() {
 		        infobox.open(map, this);
 		});
-
+							
 		markers.addMarker(marker);
 	});
 };
