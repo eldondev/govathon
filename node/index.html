@@ -1,0 +1,12 @@
+<html>
+<head>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+document.onReady(function () {
+  var socket = io.connect('http://ec2-23-23-39-12.compute-1.amazonaws.com:8080');
+  socket.on('msg', function (data) {
+    console.log(data);
+  });});
+</script>
+</head>
+</html>
