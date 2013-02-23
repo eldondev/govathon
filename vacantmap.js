@@ -22,8 +22,8 @@ xhr.onload = function() {
 	vacantProp = jsonProperties[0];
 	console.log(vacantProp); // Works now!
 	
-	$.each(data, function(i, item) {
-		var lonLat = new OpenLayers.LonLat( jsonProperties[i].lon ,jsonProperties[i].lat )
+	$.each(jsonProperties, function(i, item) {
+		var lonLat = new OpenLayers.LonLat( item.lon, item.lat )
 							.transform(
 								new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
 								map.getProjectionObject() // to Spherical Mercator Projection
