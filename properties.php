@@ -1,8 +1,9 @@
-[<? 
+<? 
 $db = new PDO ('mysql:host=localhost;dbname=teamvacant', 'root', 'hello' );
 $stmt = $db->prepare("select * from properties");
-
+    $out = array();
     foreach ($db->query("select * from properties") as $row) {
-        print json_encode(array("lat" => $row['lat'], "lon" => $row['lon'], "address" => $row['address'], "id" => $row['id']));
+        array_push($out, array("lat" => $row['lat'], "lon" => $row['lon'], "address" => $row['address'], "id" => $row['id']));
     }
-?>]
+    print json_encode($out);
+?>

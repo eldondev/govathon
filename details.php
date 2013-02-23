@@ -1,4 +1,9 @@
 <?
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+
+require 'include/property.php';
+
 $db = new PDO ('mysql:host=localhost;dbname=teamvacant', 'root', 'hello');
 
 ?>
@@ -32,40 +37,40 @@ function process_uploaded_file($id) {
       }
     else
       {
+        /*
         echo "Upload: " . $_FILES["photo"]["name"] . "<br>";
         echo "Type: " . $_FILES["photo"]["type"] . "<br>";
         echo "Size: " . ($_FILES["photo"]["size"] / 1024) . " kB<br>";
         echo "Temp photo: " . $_FILES["photo"]["tmp_name"] . "<br>";
+         */
 
-    //  if (file_exists("upload/" . $_FILES["file"]["name"]))
-    //    {
-    //    echo $_FILES["file"]["name"] . " already exists. ";
-    //    }
-    //  else
-        //    {
-        //
-        
-          $filename = "$id_" . $_FILES["photo"]["name"];
-          $fp      = fopen($_FILES["photo"]["tmp_name"], 'rb');
-          $content = fread($fp, filesize($_FILES["photo"]["tmp_name"]));
-          print_r(file_exists($_FILES["photo"]["tmp_name"]));
-          $_SESSION['file_content'] = base64_encode($content);
+        $filename = "$id_" . $_FILES["photo"]["name"];
+        $fp      = fopen($_FILES["photo"]["tmp_name"], 'rb');
+        $content = fread($fp, filesize($_FILES["photo"]["tmp_name"]));
+        $_SESSION['file_content'] = base64_encode($content);
 
-          return $filename;
-          //    }
-          //    
-          //
+        return $filename;
       }
     }
   else
     {
-    echo "Invalid file";
+      //echo "Invalid file";
     }
 
   return null;
 }
 
+if (isset($_GET['id'])) {
+  $prop = Property::find($_GET['id']);
+} else {
+  $prop = new Property(array('id' => null, 'address' => null));
+}
+
+/*
 $row = array('id' => null, 'address' => 'null');
+
+$prop = new Property::find($_GET['id']);
+print_r($prop);
 
 if ($_GET['id']) {
   $stmt = $db->prepare("SELECT * FROM properties WHERE id = ?");
@@ -73,17 +78,18 @@ if ($_GET['id']) {
   $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
   $row = $rows[0];
 }
+*/
 
-if ($_POST['submit']) {
+if (isset($_POST['submit'])) {
 
-//   print_r($_POST);
-
+  /*
   $missing = null;
   if(!$_POST['']) {
     $missing = true;
   }
+   */
 
-  $filename = print(process_uploaded_file());
+  //$filename = print(process_uploaded_file());
 
   if(!isset($_SESSION['lat'])) {
     $_SESSION['lat'] = $_POST['lat'];
@@ -95,6 +101,7 @@ if ($_POST['submit']) {
     $row[$attr] = $_POST[$attr];
   }
 
+  /*
   if ($_GET['id']) {
     $stmt = $db->prepare("UPDATE properties SET address = ? WHERE id = ?");
     $stmt->execute(array($row['address'], $row['id']));
@@ -104,8 +111,13 @@ if ($_POST['submit']) {
     $stmt->execute(array($row['address']));
     $id = $db->lastInsertId();
     header("location: details.php?id=$id"); die();
-  }
+  }*/
 
+  $prop->set('address', $row['address']);
+  $prop->save();
+
+  $id = $prop->id();
+  header("location: details.php?id=$id"); die();
 }
 
 ?>
@@ -113,7 +125,7 @@ if ($_POST['submit']) {
 <form action="" method="post" enctype="multipart/form-data">
   <div>
     <label for="address">Address</label>
-    <input id="address" name="address" type="text" value="<?= $row['address'] ?>" />
+    <input id="address" name="address" type="text" value="<?= $prop->get('address') ?>" />
   </div>
 
   <div id="photo_div">
