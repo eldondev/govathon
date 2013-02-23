@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<api>
+	<description>
+		<![CDATA[Vacant API]]>
+	</description>
+	
+	<command id='index'>
+		<description><![CDATA[Basic interactions]]></description>
+		<index>
+			<description><![CDATA[Get list of SMS as JSON]]></description>
+			<action file='service.php'><![CDATA[listSMS();]]></action>
+		</index>
+		<get>
+			<description><![CDATA[Get Google's JSON output]]></description>
+			<action file='service.php'><![CDATA[getCell($_REST['sid']);]]></action>
+		</get>
+	</command>
+</api>
+
