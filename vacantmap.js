@@ -1,7 +1,9 @@
 var xhr = new XMLHttpRequest();
-xhr.open('GET', '/vacant.json');
+xhr.open('GET', 'vacant.json');
 xhr.onload = function() {
-  // map the data
+	// map the data
+	// var response = $.parseJSON(xhr.responseText);
+	console.log(xhr.responseText); // Works now!
 };
 
 // if (tests.progress) {
@@ -13,4 +15,4 @@ xhr.onload = function() {
 //   }
 // }
 
-xhr.send(formData);
+xhr.send();
