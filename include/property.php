@@ -1,36 +1,21 @@
 <?php
 
 class Table {
-
-}
-
-class Property {
-
   static function db() {
     return new PDO ('mysql:host=localhost;dbname=teamvacant', 'root', 'hello');
   }
 
-  /*
-  static function new_record($params) {
-    return new Property($params);
-  }*/
-
-  static function find($id) {
-    $db = Property::db();
-    $stmt = $db->prepare("SELECT * FROM properties WHERE id = ?");
+  static function find($table, $id) {
+    $db = Table::db();
+    $stmt = $db->prepare("SELECT * FROM " . $table . " WHERE id = ?");
     $stmt->execute(array($_GET['id']));
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $row = $rows[0];
-    return new Property($row);
+    return new Property($table, $row);
   }
 
-  /*
-  public function attrs() {
-    return array('address'
-  }
-  */
-
-  public function __construct($params) {
+  public function __construct($table, $params) {
+    $this->table = $table;
     $this->data = $params;
   }
 
@@ -47,10 +32,11 @@ class Property {
   }
 
   function save() {
-    $db = Property::db();
+    $db = Table::db();
+    $class = get_class();
     $values = array();
-    if ($this->data['id']) {
-      $query = 'UPDATE properties SET ';
+    if (isset($this->data['id']) && $this->data['id']) {
+      $query = 'UPDATE ' . $this->table . ' SET ';
       $sets = array();
       foreach ($this->data as $key => $val) {
         if ($key != 'id') {
@@ -63,11 +49,10 @@ class Property {
       $query .= ' WHERE id = ?';
       $values[] = $this->data['id'];
 
-      print $query;
       $stmt = $db->prepare($query);
       $stmt->execute($values);
     } else {
-      $query = 'INSERT into properties ';
+      $query = 'INSERT into ' . $this->table . ' ';
       $keys = array();
       $qs = array();
       foreach ($this->data as $key => $val) {
@@ -83,6 +68,42 @@ class Property {
       $stmt->execute($values);
       $this->data['id'] = $db->lastInsertId();
     }
+  }
+}
+
+class Property extends Table {
+
+  static function tableName() {
+    return 'properties';
+  }
+
+  function browserAddress() {
+    $db = Table::db();
+    $stmt = $db->prepare("SELECT * FROM resources WHERE meta='browser_address' and property_id = ?");
+
+    $stmt->execute(array($this->id()));
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    if (count($rows)) {
+      $row = $rows[0];
+      return new Table('resources', $row);
+    } else {
+      return null;
+    }
+  }
+
+  function photos() {
+    $photos = array();
+
+    $db = Table::db();
+    $stmt = $db->prepare("SELECT * FROM resources WHERE meta='photo' and property_id = ?");
+
+    $stmt->execute(array($this->id()));
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach($rows as $row) {
+      $photos[] = new Table('resources', $row);
+    }
+
+    return $photos;
   }
 
   function relations($type = null) {

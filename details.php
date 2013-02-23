@@ -6,8 +6,15 @@ require 'include/property.php';
 
 $db = new PDO ('mysql:host=localhost;dbname=teamvacant', 'root', 'hello');
 
-?>
 
+function getGoogleAddress($lat, $lng)
+{
+  $url = "http://maps.googleapis.com/maps/api/geocode/json?ltlng=$lat,$lng&components=administrative_area:GA|country:US|locality:Atlanta&sensor=false";
+  $json = file_get_contents($url);
+  return $json;
+}
+
+?>
 
 <html>
 <head>
@@ -19,8 +26,9 @@ $db = new PDO ('mysql:host=localhost;dbname=teamvacant', 'root', 'hello');
 <?php
 
 session_start();
+    print_r($_SESSION);
 
-function process_uploaded_file($id) {
+function process_uploaded_file() {
 
   $allowedExts = array("jpg", "jpeg", "gif", "png");
   $extension = end(explode(".", $_FILES["photo"]["name"]));
@@ -44,12 +52,18 @@ function process_uploaded_file($id) {
         echo "Temp photo: " . $_FILES["photo"]["tmp_name"] . "<br>";
          */
 
-        $filename = "$id_" . $_FILES["photo"]["name"];
-        $fp      = fopen($_FILES["photo"]["tmp_name"], 'rb');
-        $content = fread($fp, filesize($_FILES["photo"]["tmp_name"]));
-        $_SESSION['file_content'] = base64_encode($content);
+        $filename = $_FILES["photo"]["name"];
+        //$fp      = fopen($_FILES["photo"]["tmp_name"], 'rb');
+        //$content = fread($fp, filesize($_FILES["photo"]["tmp_name"]));
 
+        
+        move_uploaded_file($_FILES["photo"]["tmp_name"],
+      "/var/www/govathon/upload/" . $filename);
         return $filename;
+
+        //return base64_encode($content);
+        // $content;
+
       }
     }
   else
@@ -61,26 +75,16 @@ function process_uploaded_file($id) {
 }
 
 if (isset($_GET['id'])) {
-  $prop = Property::find($_GET['id']);
+  $prop = Table::find('properties', $_GET['id']);
 } else {
-  $prop = new Property(array('id' => null, 'address' => null));
+  $prop = new Property('properties', array('id' => null, 'address' => null));
 }
 
-/*
-$row = array('id' => null, 'address' => 'null');
-
-$prop = new Property::find($_GET['id']);
-print_r($prop);
-
-if ($_GET['id']) {
-  $stmt = $db->prepare("SELECT * FROM properties WHERE id = ?");
-  $stmt->execute(array($_GET['id']));
-  $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-  $row = $rows[0];
-}
-*/
+print_r($prop->browserAddress());
 
 if (isset($_POST['submit'])) {
+
+
 
   /*
   $missing = null;
@@ -88,8 +92,6 @@ if (isset($_POST['submit'])) {
     $missing = true;
   }
    */
-
-  //$filename = print(process_uploaded_file());
 
   if(!isset($_SESSION['lat'])) {
     $_SESSION['lat'] = $_POST['lat'];
@@ -101,20 +103,32 @@ if (isset($_POST['submit'])) {
     $row[$attr] = $_POST[$attr];
   }
 
-  /*
-  if ($_GET['id']) {
-    $stmt = $db->prepare("UPDATE properties SET address = ? WHERE id = ?");
-    $stmt->execute(array($row['address'], $row['id']));
-  } else {
-    # if valid, save
-    $stmt = $db->prepare("INSERT INTO properties (address) VALUES (?)");
-    $stmt->execute(array($row['address']));
-    $id = $db->lastInsertId();
-    header("location: details.php?id=$id"); die();
-  }*/
+  if (true) {
+    $prop->set('address', $row['address']);
+    $prop->save();
 
-  $prop->set('address', $row['address']);
-  $prop->save();
+    $photo_content = process_uploaded_file();
+    if ($photo_content) {
+      $photo = new Table('resources', array('property_id' => $prop->id(),
+                                            'meta' => 'photo',
+                                            'data' => $photo_content));
+      $photo->save();
+      die();
+    }
+
+    if (isset($_SESSION['lat']) && !$prop->browserAddress()) {
+      $addr = json_decode(getGoogleAddress($_SESSION['lat'], $_SESSION['long']));
+      $result = $addr->results[0];
+      $address = $result->formatted_address;
+
+      $addr = new Table('resources', array('property_id' => $prop->id(),
+                                           'meta' => 'browser_address',
+                                           'lat' => $_SESSION['lat'],
+                                           'lon' => $_SESSION['long'],
+                                           'data' => $address));
+      $addr->save();
+    }
+  }
 
   $id = $prop->id();
   header("location: details.php?id=$id"); die();
@@ -163,6 +177,10 @@ if (isset($_POST['submit'])) {
     });
 
   </script>
+<? } ?>
+
+<? foreach($prop->photos() as $photo) { ?>
+  <img width="400" src="upload/<?= $photo->get('data'); ?>" />
 <? } ?>
 
 </body>

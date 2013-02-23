@@ -40,7 +40,7 @@ socket.on('news', function (data) {
   console.log(data);
   socket.emit('my other event', { my: 'data' });
 
-	var lonLat = new OpenLayers.LonLat( data[0].lon, data[0].lat )
+	var lonLat = new OpenLayers.LonLat( data.lon, data.lat )
 						.transform(
 							new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
 							map.getProjectionObject() // to Spherical Mercator Projection
